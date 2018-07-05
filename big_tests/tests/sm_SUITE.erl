@@ -63,7 +63,7 @@ parallel_test_cases() ->
 parallel_manual_ack_test_cases() ->
     [client_acks_more_than_sent,
      too_many_unacked_stanzas,
-     resend_unacked_after_resume_timeout,
+     %resend_unacked_after_resume_timeout,
      resume_session_state_send_message,
      resume_session_state_stop_c2s,
      server_requests_ack_after_session,
