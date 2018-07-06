@@ -15,7 +15,7 @@
 {suites, "tests", mod_global_distrib_SUITE}.
 {suites, "tests", sm_SUITE}.
 {suites, "tests", bosh_SUITE}.
-{suites, "tests", push_helper}.
+{suites, "tests", push_integration_SUITE}.
 
 {config, ["test.config"]}.
 {logdir, "ct_report"}.
