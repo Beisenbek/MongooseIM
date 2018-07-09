@@ -82,6 +82,9 @@ env:
     - RUN_SMALL_TESTS=false
   matrix:
     - PRESET=internal_mnesia DB=mnesia REL_CONFIG=with-all TLS_DIST=yes
+    - otp_release: 20.0
+      env: PRESET=pgsql_mnesia DB=pgsql REL_CONFIG="with-pgsql with-jingle-sip"
+           RUN_SMALL_TESTS=true
 
 notifications:
     webhooks:

@@ -469,6 +469,9 @@ suite() ->
     require_rpc_nodes([mim]) ++ escalus:suite().
 
 init_per_suite(Config) ->
+    dbg:tracer(),
+    dbg:p(all, [call, timestamp]),
+    dbg:tpl(?MODULE, all, x),
     muc_helper:load_muc(muc_host()),
     disable_sessions_limit(disable_shaping(
       delete_users([{escalus_user_db, {module, escalus_ejabberd}}

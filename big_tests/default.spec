@@ -10,12 +10,16 @@
 
 %% do not remove below SUITE if testing mongoose
 {suites, "tests", mongoose_sanity_checks_SUITE}.
-
 {suites, "tests", metrics_register_SUITE}.
 {suites, "tests", mod_global_distrib_SUITE}.
 {suites, "tests", sm_SUITE}.
-{suites, "tests", bosh_SUITE}.
 {suites, "tests", push_integration_SUITE}.
+{suites, "tests", mam_SUITE}.
+{suites, "tests", users_api_SUITE}.
+{suites, "tests", jingle_SUITE}.
+{suites, "tests", pubsub_SUITE}.
+{suites, "tests", push_SUITE}.
+{suites, "tests", muc_SUITE}.
 
 {config, ["test.config"]}.
 {logdir, "ct_report"}.
