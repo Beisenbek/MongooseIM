@@ -26,25 +26,29 @@
                     LUsername :: jid:luser(),
                     LServer :: jid:lserver().
 
--callback set_inbox(Username, Server, ToBareJid, Content, Count, MsgId) -> inbox_write_res() when
+-callback set_inbox(Username, Server, ToBareJid,
+                    Content, Count, MsgId, Timestamp) -> inbox_write_res() when
                     Username :: jid:luser(),
                     Server :: jid:lserver(),
                     ToBareJid :: binary(),
                     Content :: binary(),
                     Count :: binary(),
-                    MsgId :: binary().
+                    MsgId :: binary(),
+                    Timestamp :: erlang:timestamp().
 
 -callback remove_inbox(Username, Server, ToBareJid) -> inbox_write_res() when
                        Username :: jid:luser(),
                        Server :: jid:lserver(),
                        ToBareJid :: binary().
 
--callback set_inbox_incr_unread(Username, Server, ToBareJid, Content, MsgId) -> inbox_write_res() when
+-callback set_inbox_incr_unread(Username, Server, ToBareJid,
+                                Content, MsgId, Timestamp) -> inbox_write_res() when
                                 Username :: jid:luser(),
                                 Server :: jid:lserver(),
                                 ToBareJid :: binary(),
                                 Content :: binary(),
-                                MsgId :: binary().
+                                MsgId :: binary(),
+                                Timestamp :: erlang:timestamp().
 
 -callback reset_unread(Username, Server, BareJid, MsgId) -> inbox_write_res() when
                        Username :: jid:luser(),
