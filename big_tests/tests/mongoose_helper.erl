@@ -285,7 +285,7 @@ do_wait_until(_Fun, _ExpectedValue, #{
                                       history := History,
                                       name := Name
                                      }) when TimeLeft =< 0 ->
-    error({Name, History});
+    error({Name, lists:reverse(History)});
 
 do_wait_until(Fun, ExpectedValue, Opts) ->
     try Fun() of
