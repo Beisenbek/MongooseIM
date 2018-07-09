@@ -181,13 +181,13 @@ process_message(_, _, _, Message, _, _) ->
 %% Stanza builders
 
 -spec build_inbox_message(inbox_res(), id()) -> exml:element().
-build_inbox_message({_Username, Content, Count}, QueryId) ->
+build_inbox_message({_Username, Content, Count, Timestamp}, QueryId) ->
     #xmlel{name = <<"message">>, attrs = [{<<"id">>, mod_inbox_utils:wrapper_id()}],
-        children = [build_result_el(Content, QueryId, Count)]}.
+        children = [build_result_el(Content, QueryId, Count, Timestamp)]}.
 
--spec build_result_el(content(), id(), count()) -> exml:element().
-build_result_el(Msg, QueryId, BinUnread) ->
-    Forwarded = build_forward_el(Msg),
+-spec build_result_el(content(), id(), count(), non_neg_integer()) -> exml:element().
+build_result_el(Msg, QueryId, BinUnread, Timestamp) ->
+    Forwarded = build_forward_el(Msg, Timestamp),
     QueryAttr = [{<<"queryid">>, QueryId} || QueryId =/= undefined, QueryId =/= <<>>],
     #xmlel{name = <<"result">>, attrs = [{<<"xmlns">>, ?NS_ESL_INBOX}, {<<"unread">>, BinUnread}] ++
     QueryAttr, children = [Forwarded]}.
@@ -197,10 +197,18 @@ build_result_iq(CountBin) ->
     #xmlel{name = <<"count">>, attrs = [{<<"xmlns">>, ?NS_ESL_INBOX}],
         children = [#xmlcdata{content = CountBin}]}.
 
--spec build_forward_el(content()) -> exml:element().
-build_forward_el(Content) ->
+-spec build_forward_el(content(), erlang:timestamp()) -> exml:element().
+build_forward_el(Content, Timestamp) ->
     {ok, Parsed} = exml:parse(Content),
-    #xmlel{name = <<"forwarded">>, attrs = [{<<"xmlns">>, ?NS_FORWARD}], children = [Parsed]}.
+    Delay = build_delay_el(Timestamp),
+    #xmlel{name = <<"forwarded">>, attrs = [{<<"xmlns">>, ?NS_FORWARD}],
+           children = [Delay, Parsed]}.
+
+-spec build_delay_el(Timestamp :: erlang:timestamp()) -> exml:element().
+build_delay_el({_, _, Micro} = Timestamp) ->
+    {Day, {H, M, S}} = calendar:now_to_datetime(Timestamp),
+    DateTimeMicro = {Day, {H, M, S, Micro}},
+    jlib:timestamp_to_xml(DateTimeMicro, utc, undefined, undefined).
 
 %%%%%%%%%%%%%%%%%%%
 %% Helpers

@@ -48,7 +48,7 @@ get_inbox(LUsername, LServer) ->
 get_inbox_rdbms(LUser, Server) ->
     mongoose_rdbms:sql_query(
         Server,
-        ["select remote_bare_jid, content, unread_count from inbox "
+        ["select remote_bare_jid, content, unread_count, timestamp from inbox "
         "where luser=", esc_string(LUser), " and lserver=", esc_string(Server), ";"]).
 
 -spec set_inbox(Username, Server, ToBareJid, Content,
@@ -152,12 +152,12 @@ clear_inbox_rdbms(Username, Server) ->
     mongoose_rdbms:sql_query(Server, ["delete from inbox where luser=",
         esc_string(Username), " and lserver=", esc_string(Server), ";"]).
 
--spec decode_row(host(), {username(), binary(), count()}) -> inbox_res().
-decode_row(LServer, {Username, Content, Count}) ->
+-spec decode_row(host(), {username(), binary(), count(), non_neg_integer()}) -> inbox_res().
+decode_row(LServer, {Username, Content, Count, NumericTimestamp}) ->
     Pool = mongoose_rdbms_sup:pool(LServer),
     Data = mongoose_rdbms:unescape_binary(Pool, Content),
     BCount = count_to_bin(Count),
-    {Username, Data, BCount}.
+    {Username, Data, BCount, usec:to_now(NumericTimestamp)}.
 
 
 odbc_specific_backend(Host) ->

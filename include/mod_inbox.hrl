@@ -5,7 +5,10 @@
 -type count() :: binary().
 -type id() :: binary().
 -type get_inbox_res() :: list(inbox_res()).
--type inbox_res() :: {username(), content(), count()}.
+-type inbox_res() :: {RemoteUser :: username(),
+                      MsgContent :: content(),
+                      UnreadCount :: count(),
+                      Timestamp :: non_neg_integer()}.
 -type inbox_write_res() :: ok | {error, any()}.
 -type marker() :: binary().
 -type single_query_result() :: {selected, [tuple()]} |

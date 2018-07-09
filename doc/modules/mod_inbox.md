@@ -34,36 +34,37 @@ Inbox currently supports the following DBs:
 Alice sends:
 
 <message type="chat" to="bOb@localhost/res1" id=”123”>
-<body>Hello</body>
+  <body>Hello</body>
 </message>
 
 Bob receives:
 
 <message from="alicE@localhost/res1" to="bOb@localhost/res1" id=“123” xml:lang="en" type="chat">
-<body>Hello</body>
+  <body>Hello</body>
 </message>
 
 Alice sends:
 
 <iq type="get" id="10bca">
-<inbox xmlns=”erlang-solutions.com:xmpp:inbox:0” queryid="b6"/>
+  <inbox xmlns=”erlang-solutions.com:xmpp:inbox:0” queryid="b6"/>
 </iq>
 
 
 Alice receives:
 
 <message from="alicE@localhost" to="alicE@localhost" id="9b759">
-<result xmlns=”erlang-solutions.com:xmpp:inbox:0” unread="0" queryid="b6">
-<forwarded xmlns=”urn:xmpp:forward:0”>
-<message xml:lang="en" type="chat" to="bOb@localhost/res1" from="alicE@localhost/res1" id=”123”>
-<body>Hello</body>
-</message>
-</forwarded>
-</result>
+  <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="b6">
+    <forwarded xmlns="urn:xmpp:forward:0">
+      <delay xmlns="urn:xmpp:delay" stamp="2018-07-10T23:08:25.123456Z"/>
+      <message xml:lang="en" type="chat" to="bOb@localhost/res1" from="alicE@localhost/res1" id=”123”>
+        <body>Hello</body>
+      </message>
+    </forwarded>
+  </result>
 </message>
 
 <iq from="alicE@localhost" to="alicE@localhost/res1" id="10bca" type="result">
-<count xmlns='erlang-solutions.com:xmpp:inbox:0'>1</count>
+  <count xmlns='erlang-solutions.com:xmpp:inbox:0'>1</count>
 </iq>
 
 ```

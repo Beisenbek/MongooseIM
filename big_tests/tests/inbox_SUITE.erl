@@ -37,6 +37,10 @@
          no_aff_stored_and_remove_on_kicked/1,
          no_stored_and_remain_after_kicked/1]).
 
+-export([
+         timestamp_is_updated_on_new_message/1
+        ]).
+
 -import(muc_helper, [foreach_occupant/3, foreach_recipient/2]).
 -import(muc_light_helper, [bin_aff_users/1, aff_msg_verify_fun/1, gc_message_verify_fun/3, ver/1,
                            lbin/1, room_bin_jid/1, verify_aff_bcast/2, verify_aff_bcast/3,
@@ -66,7 +70,8 @@ all() ->
 tests() ->
   [
       {group, one_to_one},
-      {group, muclight}
+      {group, muclight},
+      {group, timestamps}
   ].
 
 groups() ->
@@ -95,6 +100,10 @@ groups() ->
            no_stored_and_remain_after_kicked,
            groupchat_markers_one_reset_room_created,
            groupchat_markers_all_reset_room_created
+          ]},
+         {timestamps, [sequence],
+          [
+           timestamp_is_updated_on_new_message
           ]}
         ],
     ct_helper:repeat_all_until_all_ok(G).
@@ -288,7 +297,6 @@ user_has_two_conversations(Config) ->
     check_inbox(Bob, #inbox{
       total = 1,
       convs = [#conv{unread = 1, from = AliceJid, to = BobJid, content = <<"Hello Bob">>}]})
-
                                                            end).
 
 msg_sent_to_offline_user(Config) ->
@@ -761,8 +769,42 @@ groupchat_markers_all_reset_room_created(Config) ->
     foreach_check_inbox([Bob, Kate, Alice], 1, 0, AliceRoomJid, Msg)
                                                            end).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%--------------------------------------------------------------------
+%% Inbox tests
+%%--------------------------------------------------------------------
+
+timestamp_is_updated_on_new_message(Config) ->
+  escalus:story(Config, [{alice, 1}, {bob, 1}], fun(Alice, Bob) ->
+    Msg1 = escalus_stanza:chat_to(Bob, <<"Hello Bob">>),
+    Msg2 = escalus_stanza:chat_to(Bob, <<"Are you there?">>),
+
+    escalus:send(Alice, Msg1),
+    _M1 = escalus:wait_for_stanza(Bob),
+
+    %% We capture a timestamp after first message
+    [Item1] = get_inbox(Alice, 1),
+    TStamp1 = timestamp_from_item(Item1),
+
+    escalus:send(Alice, Msg2),
+    _M2 = escalus:wait_for_stanza(Bob),
+    
+    %% Timestamp after second message must be higher
+    [Item2] = get_inbox(Alice, 1),
+    TStamp2 = timestamp_from_item(Item2),
+
+    case timer:now_diff(TStamp2, TStamp1) > 0 of
+        true -> ok;
+        false -> error(#{ type => timestamp_is_not_greater,
+                          item1 => Item1,
+                          item2 => Item2,
+                          tstamp1 => TStamp1,
+                          tstamp2 => TStamp2 })
+    end
+  end).
+
+%% ---------------------------------------------------------
 %% Helpers
+%% ---------------------------------------------------------
 
 create_room_and_check_inbox(Owner, MemberList, RoomName) ->
   InitOccupants = [{M, member} || M <- MemberList],
@@ -880,17 +922,21 @@ foreach_check_inbox(Users, Total, Unread, SenderJid, Msg) ->
      check_inbox(U, Total, [#conv{unread = Unread, from = SenderJid,  to = UserJid, content = Msg}])
     end || U <- Users].
 
+get_inbox(Client, ExpectedCount) ->
+  GetInbox = get_inbox_stanza(),
+  escalus:send(Client, GetInbox),
+  Stanzas = escalus:wait_for_stanzas(Client, ExpectedCount),
+  ResIQ = escalus:wait_for_stanza(Client),
+  ExpectedCount = get_inbox_count(ResIQ),
+  Stanzas.
+
 check_inbox(Client, #inbox{total = Total, convs = Convs}) ->
   check_inbox(Client, integer_to_binary(Total), Convs).
 
 check_inbox(Client, ExpectedCount, MsgCheckList) when is_binary(ExpectedCount) ->
   check_inbox(Client, binary_to_integer(ExpectedCount), MsgCheckList);
 check_inbox(Client, ExpectedCount, MsgCheckList) ->
-  GetInbox = get_inbox_stanza(),
-  escalus:send(Client, GetInbox),
-  Stanzas = escalus:wait_for_stanzas(Client, ExpectedCount),
-  ResIQ = escalus:wait_for_stanza(Client),
-  ExpectedCount = get_inbox_count(ResIQ),
+  Stanzas = get_inbox(Client, ExpectedCount),
   %% TODO: Replace with commented code when inbox starts sorting by timestamp by default
   %% Merged = lists:zip(Stanzas, MsgCheckList),
   %% [process_inbox_message(Client, M, ConvCheck) || {M, ConvCheck} <- Merged].
@@ -971,7 +1017,10 @@ get_inbox_count(Packet) ->
       binary_to_integer(Val)
   end.
 
-
+timestamp_from_item(Item) ->
+    ISOTStamp = exml_query:path(Item, [{element, <<"result">>}, {element, <<"forwarded">>},
+                                       {element, <<"delay">>}, {attr, <<"stamp">>}]),
+    escalus_ejabberd:rpc(jlib, datetime_binary_to_timestamp, [ISOTStamp]).
 
 clear_inbox_all() ->
   Host = ct:get_config({hosts, mim, domain}),
