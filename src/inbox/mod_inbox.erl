@@ -185,7 +185,7 @@ build_inbox_message({_Username, Content, Count, Timestamp}, QueryId) ->
     #xmlel{name = <<"message">>, attrs = [{<<"id">>, mod_inbox_utils:wrapper_id()}],
         children = [build_result_el(Content, QueryId, Count, Timestamp)]}.
 
--spec build_result_el(content(), id(), count(), non_neg_integer()) -> exml:element().
+-spec build_result_el(content(), id(), count(), erlang:timestamp()) -> exml:element().
 build_result_el(Msg, QueryId, BinUnread, Timestamp) ->
     Forwarded = build_forward_el(Msg, Timestamp),
     QueryAttr = [{<<"queryid">>, QueryId} || QueryId =/= undefined, QueryId =/= <<>>],

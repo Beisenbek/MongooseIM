@@ -8,7 +8,7 @@
 -type inbox_res() :: {RemoteUser :: username(),
                       MsgContent :: content(),
                       UnreadCount :: count(),
-                      Timestamp :: non_neg_integer()}.
+                      Timestamp :: erlang:timestamp()}.
 -type inbox_write_res() :: ok | {error, any()}.
 -type marker() :: binary().
 -type single_query_result() :: {selected, [tuple()]} |
