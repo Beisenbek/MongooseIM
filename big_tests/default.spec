@@ -17,11 +17,17 @@
 {suites, "tests", push_integration_SUITE}.
 {suites, "tests", mam_SUITE}.
 {suites, "tests", users_api_SUITE}.
+<<<<<<< HEAD
 {suites, "tests", jingle_SUITE}.
 {suites, "tests", pubsub_SUITE}.
 {suites, "tests", push_SUITE}.
 {suites, "tests", muc_SUITE}.
 
+=======
+%% {suites, "tests", jingle_SUITE}.
+%% {suites, "tests", pubsub_SUITE}.
+%% {suites, "tests", push_SUITE}.
+>>>>>>> 16a399928... Adjust muc_SUITE to mongoose_helper:wait_until/2
 {config, ["test.config"]}.
 {logdir, "ct_report"}.
 
